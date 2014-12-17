@@ -98,7 +98,8 @@ public class MyTableProvider implements TableProvider {
                             try {
                                 Files.delete(dbFile.toPath());
                             } catch (IOException e) {
-                                throw new RuntimeException("MyTableProvider.removeTable: cannon delete database file", e);
+                                throw new RuntimeException("MyTableProvider.removeTable: "
+                                        + "cannon delete database file", e);
                             }
                         }
                     }

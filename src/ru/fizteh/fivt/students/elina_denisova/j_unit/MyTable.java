@@ -56,8 +56,7 @@ public class MyTable implements Table {
             int file = hashCode / 16 % 16;
             String adds = Integer.toString(dir * 100 + file);
             return databases.get(adds).get(key);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Table.get: Haven't key. ");
         }
     }
@@ -194,8 +193,8 @@ public class MyTable implements Table {
 
                         int k = 0;
                         for (int file = 0; file < 16; file++) {
-                            String variable_adds = Integer.toString(i * 100 + file);
-                            if (databases.containsKey(variable_adds)) {
+                            String variableAdds = Integer.toString(i * 100 + file);
+                            if (databases.containsKey(variableAdds)) {
                                 k++;
                             }
                         }

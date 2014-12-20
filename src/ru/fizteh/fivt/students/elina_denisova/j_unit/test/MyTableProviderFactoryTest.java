@@ -25,7 +25,7 @@ public class MyTableProviderFactoryTest {
 
     @Test
     public void create() throws IOException {
-        assertNotNull(factory.create(folder.newFolder().getCanonicalPath()));
+        assertNotNull(factory.create(folder.newFolder("test").getCanonicalPath()));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -23,7 +23,7 @@ public class MyTableProviderTest {
     @Before
     public void initProvider() throws IOException {
         TableProviderFactory factory = new MyTableProviderFactory();
-        provider = factory.create(folder.newFolder().getAbsolutePath());
+        provider = factory.create(folder.newFolder("test").getAbsolutePath());
     }
 
     @Test (expected = IllegalArgumentException.class)

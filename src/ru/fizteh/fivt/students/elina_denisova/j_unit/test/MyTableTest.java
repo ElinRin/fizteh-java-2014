@@ -26,7 +26,7 @@ public class MyTableTest {
     @Before
     public void initTable() throws IOException {
         TableProviderFactory factory = new MyTableProviderFactory();
-        dbDirPath = folder.newFolder().getAbsolutePath();
+        dbDirPath = folder.newFolder("test").getAbsolutePath();
         TableProvider provider = factory.create(dbDirPath);
         table = provider.createTable("table");
     }

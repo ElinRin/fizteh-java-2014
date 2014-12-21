@@ -3,6 +3,7 @@ package ru.fizteh.fivt.students.elina_denisova.j_unit;
 public enum Commands {
 
     CREATECOMMAND("create"),
+    SIZECOMMAND("size"),
     COMMITCOMMAND("commit"),
     ROLLBACKCOMMAND("rollback"),
     DROPCOMMAND("drop"),

@@ -188,6 +188,13 @@ public class ParserCommands {
                         System.out.println(directory.getUsing().list());
                     }
                     break;
+                case SIZECOMMAND:
+                    if (directory.getUsing() == null) {
+                        System.out.println("no table");
+                    } else {
+                        System.out.println(directory.getUsing().size());
+                    }
+                    break;
                 case EXITCOMMAND:
                     if (numberChanges == 0) {
                         throw new IllegalMonitorStateException("Exit");

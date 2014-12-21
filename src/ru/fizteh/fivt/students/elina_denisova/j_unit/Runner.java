@@ -22,7 +22,7 @@ public class Runner {
         } catch (NullPointerException e) {
             HandlerException.handler(e);
         } catch (Exception e) {
-            HandlerException.handler("Runner: Unknown error", e);
+            HandlerException.handler("Runner: ", e);
         }
     }
 

@@ -23,7 +23,7 @@ public class InteractiveParse {
             System.exit(0);
         } catch (Exception e) {
             in.close();
-            HandlerException.handler("InteractiveParse: Unknown error", e);
+            HandlerException.handler("InteractiveParse: ", e);
         }
         in.close();
     }

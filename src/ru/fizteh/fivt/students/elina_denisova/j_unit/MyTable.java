@@ -18,24 +18,28 @@ public class MyTable implements Table {
     private static Map<Integer, ArrayList<String>> changes = new HashMap<>();
     private int numberChanges = 0;
 
+    public static final int COUNT_OBJECT = 16;
+    public static final int COMMON_CONSTANT_INDEX = 100;
+
+
     public MyTable(File tableDir) {
         try {
             databases = new HashMap<>();
             mainDir = tableDir.toPath();
 
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < COUNT_OBJECT; i++) {
                 File subDir = new File(tableDir, i + ".dir");
-                for (int j = 0; j < 16; j++) {
+                for (int j = 0; j < COUNT_OBJECT; j++) {
                     File dbFile = new File(subDir, j + ".dat");
                     if (dbFile.exists()) {
-                        String adds = Integer.toString(i * 100 + j);
+                        String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                         databases.put(adds, new HashMap<String, String>());
                         readFromFile(dbFile, databases.get(adds));
                     }
                 }
             }
         } catch (Exception e) {
-            HandlerException.handler("TableProvider: Unknown error", e);
+            HandlerException.handler("TableProvider: ", e);
         }
     }
 
@@ -52,9 +56,9 @@ public class MyTable implements Table {
     public String get(String key) throws IllegalArgumentException {
         if (key != null) {
             int hashCode = Math.abs(key.hashCode());
-            int dir = hashCode % 16;
-            int file = hashCode / 16 % 16;
-            String adds = Integer.toString(dir * 100 + file);
+            int dir = hashCode % COUNT_OBJECT;
+            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
+            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
             return databases.get(adds).get(key);
         } else {
             throw new IllegalArgumentException("Table.get: Haven't key. ");
@@ -64,47 +68,27 @@ public class MyTable implements Table {
     @Override
     public String put(String key, String value) {
         if ((key != null) || (value != null)) {
-            try {
-                int hashCode = Math.abs(key.hashCode());
-                int dir = hashCode % 16;
-                int file = hashCode / 16 % 16;
-                String adds = Integer.toString(dir * 100 + file);
-                if (!databases.containsKey(adds)) {
-                    File subDir = new File(mainDir.toString(), dir + ".dir");
-                    if (!subDir.exists()) {
-                        if (!subDir.mkdir()) {
-                            throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
-                                    + " Unable to create directories in working catalog");
-                        }
-                    }
-                    File dbFile = new File(subDir, file + ".dat");
-                    if (!dbFile.exists()) {
-                        if (!dbFile.createNewFile()) {
-                            throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
-                                    + " Unable to create database files in working catalog");
-                        }
-                    }
-                    databases.put(adds, new HashMap<String, String>());
-                }
-
-                String oldValue = databases.get(adds).get(key);
-                databases.get(adds).put(key, value);
-                numberChanges++;
-                changes.put(numberChanges, new ArrayList<String>());
-                changes.get(numberChanges).add("put");
-                changes.get(numberChanges).add(key);
-                changes.get(numberChanges).add(value);
-                if (oldValue == null) {
-                    changes.get(numberChanges).add("new");
-                } else {
-                    changes.get(numberChanges).add(oldValue);
-                }
-                return oldValue;
-
-
-            } catch (IOException e) {
-                throw new NullPointerException("MyTable.put: Cannot create new file. ");
+            int hashCode = Math.abs(key.hashCode());
+            int dir = hashCode % COUNT_OBJECT;
+            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
+            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+            if (!databases.containsKey(adds)) {
+                databases.put(adds, new HashMap<String, String>());
             }
+
+            String oldValue = databases.get(adds).get(key);
+            databases.get(adds).put(key, value);
+            numberChanges++;
+            changes.put(numberChanges, new ArrayList<String>());
+            changes.get(numberChanges).add("put");
+            changes.get(numberChanges).add(key);
+            changes.get(numberChanges).add(value);
+            if (oldValue == null) {
+                changes.get(numberChanges).add("new");
+            } else {
+                changes.get(numberChanges).add(oldValue);
+            }
+            return oldValue;
         } else {
             throw new IllegalArgumentException("MyTable.put: Haven't key or value. ");
         }
@@ -114,9 +98,9 @@ public class MyTable implements Table {
     public String remove(String key) {
         if (key != null) {
             int hashCode = Math.abs(key.hashCode());
-            int dir = hashCode % 16;
-            int file = hashCode / 16 % 16;
-            String adds = Integer.toString(dir * 100 + file);
+            int dir = hashCode % COUNT_OBJECT;
+            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
+            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
             if (!databases.containsKey(adds)) {
                 return null;
             } else {
@@ -137,9 +121,9 @@ public class MyTable implements Table {
     @Override
     public int size() {
         int answer = 0;
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                String adds = Integer.toString(i * 100 + j);
+        for (int i = 0; i < COUNT_OBJECT; i++) {
+            for (int j = 0; j < COUNT_OBJECT; j++) {
+                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                 if (databases.containsKey(adds)) {
                     answer += databases.get(adds).size();
                 }
@@ -154,19 +138,38 @@ public class MyTable implements Table {
         changes = new HashMap<>();
 
         int count = 0;
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                String adds = Integer.toString(i * 100 + j);
+        for (int i = 0; i < COUNT_OBJECT; i++) {
+            for (int j = 0; j < COUNT_OBJECT; j++) {
+                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                 if (databases.containsKey(adds)) {
                     File directory = new File(mainDir.toString(), i + ".dir");
-                    File dataBaseOld = new File(directory, j + ".dat");
-                    try {
-                        Files.delete(dataBaseOld.toPath());
-                    } catch (IOException e) {
-                        throw new RuntimeException("MyTable.writeInFile: Can't overwrite file");
+                    if (!directory.exists()) {
+                        if (!directory.mkdir()) {
+                            throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
+                                    + " Unable to create directories in working catalog");
+                        }
                     }
-                    File dataBase = new File(directory, j + ".dat");
-                    try (RandomAccessFile dbFile = new RandomAccessFile(dataBase, "rw")) {
+                    File dataBaseOld = new File(directory, j + ".dat");
+                    if (dataBaseOld.exists()) {
+                        try {
+                            Files.delete(dataBaseOld.toPath());
+                        } catch (IOException e) {
+                            throw new RuntimeException("MyTable.writeInFile: Can't overwrite file");
+                        }
+                    }
+
+                    if (!dataBaseOld.exists()) {
+                        try {
+                            if (!dataBaseOld.createNewFile()) {
+                                throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
+                                        + " Unable to create database files in working catalog");
+                            }
+                        } catch (IOException e) {
+                            throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
+                                    + " Unable to create database files in working catalog");
+                        }
+                    }
+                    try (RandomAccessFile dbFile = new RandomAccessFile(dataBaseOld, "rw")) {
                         for (Map.Entry<String, String> current : databases.get(adds).entrySet()) {
                             count++;
                             writeNext(dbFile, current.getKey());
@@ -192,13 +195,13 @@ public class MyTable implements Table {
                         databases.remove(adds);
 
                         int k = 0;
-                        for (int file = 0; file < 16; file++) {
-                            String variableAdds = Integer.toString(i * 100 + file);
+                        for (int file = 0; file < COUNT_OBJECT; file++) {
+                            String variableAdds = Integer.toString(i * COMMON_CONSTANT_INDEX + file);
                             if (databases.containsKey(variableAdds)) {
                                 k++;
                             }
                         }
-                        if (k == 16) {
+                        if (k == COUNT_OBJECT) {
                             try {
                                 Files.delete(subDir.toPath());
                             } catch (DirectoryNotEmptyException e) {
@@ -249,7 +252,7 @@ public class MyTable implements Table {
         } catch (IOException e) {
             throw new RuntimeException(" Table.readFromFile: Problems with reading from database file " + e.toString());
         } catch (Exception e) {
-            throw new RuntimeException("Table.readFromFile: Unknown error", e);
+            throw new RuntimeException("Table.readFromFile: ", e);
         }
     }
 
@@ -296,9 +299,9 @@ public class MyTable implements Table {
     @Override
     public List<String> list() {
         List<String> listKey = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                String adds = Integer.toString(i * 100 + j);
+        for (int i = 0; i < COUNT_OBJECT; i++) {
+            for (int j = 0; j < COUNT_OBJECT; j++) {
+                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                 if (databases.containsKey(adds)) {
                     for (String key : databases.get(adds).keySet()) {
                         listKey.add(key);

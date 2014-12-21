@@ -19,6 +19,9 @@ public class MyTableProvider implements TableProvider {
     private String using;
     private File parentDirectory;
 
+    public static final int COUNT_OBJECT = 16;
+    public static final int COMMON_CONSTANT_INDEX = 100;
+
 
     public MyTableProvider(String path) {
         parentDirectory = new File(path);
@@ -52,7 +55,7 @@ public class MyTableProvider implements TableProvider {
         } catch (FileNotFoundException e) {
             HandlerException.handler(e);
         } catch (Exception e) {
-            HandlerException.handler("TableProviderFactory: Unknown error", e);
+            HandlerException.handler("TableProviderFactory: ", e);
         }
     }
 
@@ -88,10 +91,10 @@ public class MyTableProvider implements TableProvider {
         }
         if (tables.containsKey(name)) {
             File table = new File(parentDirectory, name);
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < COUNT_OBJECT; i++) {
                 File subDir = new File(table, i + ".dir");
-                for (int j = 0; j < 16; j++) {
-                    String adds = Integer.toString(i * 100 + j);
+                for (int j = 0; j < COUNT_OBJECT; j++) {
+                    String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                     if (tables.get(name).containsKey(adds)) {
                         File dbFile = new File(subDir, j + ".dat");
                         if (dbFile.exists()) {

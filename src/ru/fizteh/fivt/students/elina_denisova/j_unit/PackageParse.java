@@ -26,7 +26,7 @@ public class PackageParse {
         } catch (IllegalArgumentException e) {
             HandlerException.handler("PackageParse: Wrong arguments", e);
         } catch (Exception e) {
-            HandlerException.handler("PackageParse: Unknown error", e);
+            HandlerException.handler("PackageParse: ", e);
         }
     }
 }

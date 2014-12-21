@@ -21,12 +21,13 @@ public class ParserCommands {
                             if (command[2] != null) {
                                 System.err.println("create: need only one argument");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
+                        } catch (ArrayIndexOutOfBoundsException e) {
 
-                        if (directory.createTable(command[1]) == null) {
-                            System.out.println(command[1] + " exists");
-                        } else {
-                            System.out.println("created");
+                            if (directory.createTable(command[1]) == null) {
+                                System.out.println(command[1] + " exists");
+                            } else {
+                                System.out.println("created");
+                            }
                         }
                     } catch (UnsupportedOperationException e) {
                         HandlerException.handler(e);
@@ -40,18 +41,19 @@ public class ParserCommands {
                             if (command[3] != null) {
                                 System.err.println("create: need two arguments");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
-                        if (directory.getUsing() == null) {
-                            System.out.println("no table");
-                        } else {
-                            String oldValue = directory.getUsing().put(command[1], command[2]);
-                            if (oldValue != null) {
-                                System.out.println("overwrite");
-                                System.out.println(oldValue);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (directory.getUsing() == null) {
+                                System.out.println("no table");
                             } else {
-                                System.out.println("new");
+                                String oldValue = directory.getUsing().put(command[1], command[2]);
+                                if (oldValue != null) {
+                                    System.out.println("overwrite");
+                                    System.out.println(oldValue);
+                                } else {
+                                    System.out.println("new");
+                                }
+                                numberChanges++;
                             }
-                            numberChanges++;
                         }
 
                     } catch (UnsupportedOperationException e) {
@@ -70,15 +72,16 @@ public class ParserCommands {
                             if (command[2] != null) {
                                 System.err.println("create: need only one argument");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
-                        if (directory.getUsing() == null) {
-                            System.out.println("no table");
-                        } else {
-                            if (directory.getUsing().get(command[1]) != null) {
-                                System.out.println("found");
-                                System.out.println(directory.getUsing().get(command[1]));
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (directory.getUsing() == null) {
+                                System.out.println("no table");
                             } else {
-                                System.out.println("not found");
+                                if (directory.getUsing().get(command[1]) != null) {
+                                    System.out.println("found");
+                                    System.out.println(directory.getUsing().get(command[1]));
+                                } else {
+                                    System.out.println("not found");
+                                }
                             }
                         }
                     } catch (IllegalArgumentException e) {
@@ -93,16 +96,17 @@ public class ParserCommands {
                             if (command[2] != null) {
                                 System.err.println("create: need only one argument");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
-                        if (directory.getUsing() == null) {
-                            System.out.println("no table");
-                        } else {
-                            String oldValue = directory.getUsing().remove(command[1]);
-                            if (oldValue != null) {
-                                System.out.println("removed");
-                                numberChanges++;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (directory.getUsing() == null) {
+                                System.out.println("no table");
                             } else {
-                                System.out.println("not found");
+                                String oldValue = directory.getUsing().remove(command[1]);
+                                if (oldValue != null) {
+                                    System.out.println("removed");
+                                    numberChanges++;
+                                } else {
+                                    System.out.println("not found");
+                                }
                             }
                         }
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -115,12 +119,13 @@ public class ParserCommands {
                             if (command[2] != null) {
                                 System.err.println("create: need only one argument");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
-                        if (directory.getTable(command[1]) == directory.getUsing()) {
-                            numberChanges = 0;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (directory.getTable(command[1]) == directory.getUsing()) {
+                                numberChanges = 0;
+                            }
+                            directory.removeTable(command[1]);
+                            System.out.println("dropped");
                         }
-                        directory.removeTable(command[1]);
-                        System.out.println("dropped");
                     } catch (IllegalStateException e) {
                         System.out.println(command[1] + " not exist");
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -142,16 +147,17 @@ public class ParserCommands {
                             if (command[2] != null) {
                                 System.err.println("create: need only one argument");
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {}
-                        if (numberChanges == 0) {
-                            if (!directory.containsKey(command[1])) {
-                                System.err.println("use: " + command[1] + " not exists");
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            if (numberChanges == 0) {
+                                if (!directory.containsKey(command[1])) {
+                                    System.err.println("use: " + command[1] + " not exists");
+                                } else {
+                                    directory.changeUsingTable(command[1]);
+                                    System.out.println("using " + command[1]);
+                                }
                             } else {
-                                directory.changeUsingTable(command[1]);
-                                System.out.println("using " + command[1]);
+                                System.err.println(numberChanges + "  unsaved changes");
                             }
-                        } else {
-                            System.err.println(numberChanges + "  unsaved changes");
                         }
                     } catch (ArrayIndexOutOfBoundsException e) {
                         System.err.println("use: need argument");

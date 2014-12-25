@@ -25,7 +25,7 @@ public abstract class Commands {
     }
 
     public static Commands fromString(String[] s) throws Exception {
-        if (s[0] == "") {
+        if (s[0].equals("")) {
             throw new NoSuchElementException("");
         }
         if (s[0].equals("show")) {

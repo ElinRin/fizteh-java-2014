@@ -21,8 +21,6 @@ public class MyTableProvider implements TableProvider {
 
     public static final int COUNT_OBJECT = 16;
     public static final int COMMON_CONSTANT_INDEX = 100;
-    public static final String SUF_DIR = ".dir";
-    public static final String SUF_FILE = ".dat";
 
 
     public MyTableProvider(String path) {
@@ -94,11 +92,11 @@ public class MyTableProvider implements TableProvider {
         if (tables.containsKey(name)) {
             File table = new File(parentDirectory, name);
             for (int i = 0; i < COUNT_OBJECT; i++) {
-                File subDir = new File(table, i + SUF_DIR);
+                File subDir = new File(table, i + ".dir");
                 for (int j = 0; j < COUNT_OBJECT; j++) {
                     String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                     if (tables.get(name).containsKey(adds)) {
-                        File dbFile = new File(subDir, j + SUF_FILE);
+                        File dbFile = new File(subDir, j + ".dat");
                         if (dbFile.exists()) {
                             try {
                                 Files.delete(dbFile.toPath());

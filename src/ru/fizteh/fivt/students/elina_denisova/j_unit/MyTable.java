@@ -20,7 +20,9 @@ public class MyTable implements Table {
 
     public static final int COUNT_OBJECT = 16;
     public static final int COMMON_CONSTANT_INDEX = 100;
-
+    public static final String ENCODING = "UTF-8";
+    public static final String SUF_DIR = ".dir";
+    public static final String SUF_FILE = ".dat";
 
     public MyTable(File tableDir) {
         try {
@@ -28,9 +30,9 @@ public class MyTable implements Table {
             mainDir = tableDir.toPath();
 
             for (int i = 0; i < COUNT_OBJECT; i++) {
-                File subDir = new File(tableDir, i + ".dir");
+                File subDir = new File(tableDir, i + SUF_DIR);
                 for (int j = 0; j < COUNT_OBJECT; j++) {
-                    File dbFile = new File(subDir, j + ".dat");
+                    File dbFile = new File(subDir, j + SUF_FILE);
                     if (dbFile.exists()) {
                         String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                         databases.put(adds, new HashMap<String, String>());
@@ -52,13 +54,17 @@ public class MyTable implements Table {
         return mainDir.toString();
     };
 
+    private String pathname(String key) {
+        int hashCode = Math.abs(key.hashCode());
+        int dir = hashCode % COUNT_OBJECT;
+        int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
+        return Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+    }
+
     @Override
     public String get(String key) throws IllegalArgumentException {
         if (key != null) {
-            int hashCode = Math.abs(key.hashCode());
-            int dir = hashCode % COUNT_OBJECT;
-            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
-            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+            String adds = pathname(key);
             return databases.get(adds).get(key);
         } else {
             throw new IllegalArgumentException("Table.get: Haven't key. ");
@@ -68,10 +74,7 @@ public class MyTable implements Table {
     @Override
     public String put(String key, String value) {
         if ((key != null) || (value != null)) {
-            int hashCode = Math.abs(key.hashCode());
-            int dir = hashCode % COUNT_OBJECT;
-            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
-            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+            String adds = pathname(key);
             if (!databases.containsKey(adds)) {
                 databases.put(adds, new HashMap<String, String>());
             }
@@ -97,10 +100,7 @@ public class MyTable implements Table {
     @Override
     public String remove(String key) {
         if (key != null) {
-            int hashCode = Math.abs(key.hashCode());
-            int dir = hashCode % COUNT_OBJECT;
-            int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
-            String adds = Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+            String adds = pathname(key);
             if (!databases.containsKey(adds)) {
                 return null;
             } else {
@@ -142,14 +142,14 @@ public class MyTable implements Table {
             for (int j = 0; j < COUNT_OBJECT; j++) {
                 String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
                 if (databases.containsKey(adds)) {
-                    File directory = new File(mainDir.toString(), i + ".dir");
+                    File directory = new File(mainDir.toString(), i + SUF_DIR);
                     if (!directory.exists()) {
                         if (!directory.mkdir()) {
                             throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
                                     + " Unable to create directories in working catalog");
                         }
                     }
-                    File dataBaseOld = new File(directory, j + ".dat");
+                    File dataBaseOld = new File(directory, j + SUF_FILE);
                     if (dataBaseOld.exists()) {
                         try {
                             Files.delete(dataBaseOld.toPath());
@@ -160,11 +160,10 @@ public class MyTable implements Table {
 
                     if (!dataBaseOld.exists()) {
                         try {
-                            if (!dataBaseOld.createNewFile()) {
-                                throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
-                                        + " Unable to create database files in working catalog");
+                            if(!dataBaseOld.createNewFile()) {
+                                throw new IOException();
                             }
-                        } catch (IOException e) {
+                        } catch (IOException | NullPointerException e) {
                             throw new UnsupportedOperationException("ParserCommands.commandsExecution.put:"
                                     + " Unable to create database files in working catalog");
                         }
@@ -182,8 +181,8 @@ public class MyTable implements Table {
                     }
 
                     if (databases.get(adds).size() == 0) {
-                        File subDir = new File(mainDir.toString(), i + ".dir");
-                        File dbFile = new File(subDir, j + ".dat");
+                        File subDir = new File(mainDir.toString(), i + SUF_DIR);
+                        File dbFile = new File(subDir, j + SUF_FILE);
                         try {
                             if (dbFile.exists()) {
                                 Files.delete(dbFile.toPath());
@@ -201,7 +200,7 @@ public class MyTable implements Table {
                                 k++;
                             }
                         }
-                        if (k == COUNT_OBJECT) {
+                        if (k == 0) {
                             try {
                                 Files.delete(subDir.toPath());
                             } catch (DirectoryNotEmptyException e) {
@@ -222,10 +221,10 @@ public class MyTable implements Table {
 
     private void writeNext(RandomAccessFile dbFile, String word) throws IOException {
         try {
-            dbFile.writeInt(word.getBytes("UTF-8").length);
-            dbFile.write(word.getBytes("UTF-8"));
+            dbFile.writeInt(word.getBytes(ENCODING).length);
+            dbFile.write(word.getBytes(ENCODING));
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Table.writeNext: Don't supported encoding UTF-8. ");
+            throw new RuntimeException("Table.writeNext: Don't supported encoding " + ENCODING + ". ");
         } catch (IOException e) {
             throw new RuntimeException("Table.writeNext: Can't write to database. ", e);
         }
@@ -262,7 +261,7 @@ public class MyTable implements Table {
             int wordLength = dbFile.readInt();
             byte[] word = new byte[wordLength];
             dbFile.read(word, 0, wordLength);
-            return new String(word, "UTF-8");
+            return new String(word, ENCODING);
         } catch (UnsupportedEncodingException e) {
             throw new UnsupportedEncodingException("Table.readNext: UTF-8 encoding is not supported");
         } catch (IOException e) {

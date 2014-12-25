@@ -147,5 +147,6 @@ public class MyTableTest {
         assertEquals(3, table.size());
         assertEquals(1, table.rollback());
         assertEquals(2, table.size());
+        assertEquals(null, table.get("1"));
     }
 }

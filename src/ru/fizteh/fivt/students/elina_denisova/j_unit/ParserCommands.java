@@ -7,6 +7,7 @@ public class ParserCommands {
 
     private static int numberChanges = 0;
 
+
     public static void commandsExecution(String[] command, MyTableProvider directory)
             throws IllegalMonitorStateException {
         if (command.length == 0) {
@@ -76,9 +77,10 @@ public class ParserCommands {
                             if (directory.getUsing() == null) {
                                 System.out.println("no table");
                             } else {
-                                if (directory.getUsing().get(command[1]) != null) {
+                                String value = directory.getUsing().get(command[1]);
+                                if (value != null) {
                                     System.out.println("found");
-                                    System.out.println(directory.getUsing().get(command[1]));
+                                    System.out.println(value);
                                 } else {
                                     System.out.println("not found");
                                 }
@@ -206,7 +208,7 @@ public class ParserCommands {
                     System.err.println(command[0] + " - unknown command");
             }
         } catch (IllegalArgumentException e) {
-            System.err.println(e.toString());
+            System.err.println(e.getMessage());
         }
     }
 

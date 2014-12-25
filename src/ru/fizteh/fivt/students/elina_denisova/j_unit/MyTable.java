@@ -160,7 +160,7 @@ public class MyTable implements Table {
 
                     if (!dataBaseOld.exists()) {
                         try {
-                            if(!dataBaseOld.createNewFile()) {
+                            if (!dataBaseOld.createNewFile()) {
                                 throw new IOException();
                             }
                         } catch (IOException | NullPointerException e) {

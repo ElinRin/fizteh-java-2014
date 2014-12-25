@@ -309,4 +309,8 @@ public class MyTable implements Table {
             }
         } return listKey;
     }
+
+    public int unsavedChanges() {
+        return numberChanges;
+    }
 }

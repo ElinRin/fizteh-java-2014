@@ -1,6 +1,9 @@
 package ru.fizteh.fivt.students.elina_denisova.j_unit;
 
+import ru.fizteh.fivt.students.elina_denisova.j_unit.commands.Commands;
+
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class PackageParse {
     public static void parse(MyTableProvider directory, String[] arg) {
@@ -17,7 +20,17 @@ public class PackageParse {
                         break;
                     }
                 }
-                ParserCommands.commandsExecution(current, directory);
+                if (current.size() == 0) {
+                    return;
+                }
+                String[] com = new String[current.size()];
+                com = current.toArray(com);
+                try {
+                    Commands command = Commands.fromString(com);
+                    command.execute(directory);
+                } catch (NoSuchElementException e) {
+                    System.err.println(e.getMessage());
+                }
             }
             directory.getUsing().commit();
         } catch (IllegalMonitorStateException e) {

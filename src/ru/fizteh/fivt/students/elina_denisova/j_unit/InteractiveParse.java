@@ -1,5 +1,8 @@
 package ru.fizteh.fivt.students.elina_denisova.j_unit;
 
+import ru.fizteh.fivt.students.elina_denisova.j_unit.commands.Commands;
+
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class InteractiveParse {
@@ -15,12 +18,19 @@ public class InteractiveParse {
                 for (int i = 0; i < current.length; ++i) {
                     current[i].trim();
                 }
-                ParserCommands.commandsExecution(current, directory);
+                try {
+                    Commands command = Commands.fromString(current);
+                    command.execute(directory);
+                } catch (NoSuchElementException e) {
+                    System.err.println(e.getMessage());
+                }
             }
         } catch (IllegalMonitorStateException e) {
             in.close();
             System.out.println("Goodbye");
             System.exit(0);
+        } catch (NoSuchElementException e) {
+            System.err.println(e.getMessage());
         } catch (Exception e) {
             in.close();
             HandlerException.handler("InteractiveParse: ", e);

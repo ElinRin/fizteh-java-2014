@@ -4,7 +4,6 @@ import ru.fizteh.fivt.storage.strings.Table;
 import ru.fizteh.fivt.storage.strings.TableProvider;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
@@ -32,13 +31,13 @@ public class MyTableProvider implements TableProvider {
 
         try {
             if (path == null) {
-                throw new NullPointerException("MyTableProvider: Wrong path");
+                throw new NullPointerException(" Wrong path");
             }
             if (!Files.exists(parentDirectory.toPath()) && !parentDirectory.mkdir()) {
-                throw new UnsupportedOperationException("MyTableProvider: Cannot create working directory");
+                throw new IllegalArgumentException(" Cannot create working directory");
             }
             if (!parentDirectory.isDirectory()) {
-                throw new FileNotFoundException("MyTableProvider:" + parentDirectory.toString()
+                throw new IllegalArgumentException("" + parentDirectory.toString()
                         + " is not a directory");
             }
             for (String childName : parentDirectory.list()) {
@@ -46,18 +45,12 @@ public class MyTableProvider implements TableProvider {
                 if (childDirectory.isDirectory()) {
                     tables.put(childName, new MyTable(childDirectory));
                 } else {
-                    throw new Exception("MyTableProvider:" + childName
+                    throw new IllegalArgumentException(childName
                             + " from databases directory is not a directory");
                 }
             }
-        } catch (UnsupportedOperationException e) {
+        } catch (IllegalArgumentException e) {
             HandlerException.handler(e);
-        } catch (NullPointerException e) {
-            HandlerException.handler(e);
-        } catch (FileNotFoundException e) {
-            HandlerException.handler(e);
-        } catch (Exception e) {
-            HandlerException.handler("TableProviderFactory: ", e);
         }
     }
 
@@ -69,7 +62,7 @@ public class MyTableProvider implements TableProvider {
     @Override
     public Table createTable(String name) {
         if (name == null) {
-            throw new IllegalArgumentException("MyTableProvider.createTable: "
+            throw new IllegalArgumentException("createTable: "
                     + "Invalid name. ");
         }
         if (tables.containsKey(name)) {
@@ -77,7 +70,7 @@ public class MyTableProvider implements TableProvider {
         } else {
             File newTable = new File(parentDirectory, name);
             if (!newTable.mkdir()) {
-                throw new UnsupportedOperationException("MyTableProvider.createTable: "
+                throw new UnsupportedOperationException("createTable: "
                         + "Unable to create working directory for new table. ");
             }
             tables.put(name, new MyTable(newTable));
@@ -88,7 +81,7 @@ public class MyTableProvider implements TableProvider {
     @Override
     public void removeTable(String name) {
         if (name == null) {
-            throw new IllegalArgumentException("MyTableProvider.removeTable: "
+            throw new IllegalArgumentException("removeTable: "
                     + "Invalid name. ");
         }
         if (tables.containsKey(name)) {
@@ -103,7 +96,7 @@ public class MyTableProvider implements TableProvider {
                             try {
                                 Files.delete(dbFile.toPath());
                             } catch (IOException e) {
-                                throw new RuntimeException("MyTableProvider.removeTable: "
+                                throw new RuntimeException("removeTable: "
                                         + "cannon delete database file", e);
                             }
                         }
@@ -113,10 +106,10 @@ public class MyTableProvider implements TableProvider {
                     try {
                         Files.delete(subDir.toPath());
                     } catch (DirectoryNotEmptyException e) {
-                        throw new RuntimeException("MyTableProvider.removeTable: "
+                        throw new RuntimeException("removeTable: "
                                 + "cannot remove table subdirectory", e);
                     } catch (IOException e) {
-                        throw new RuntimeException("MyTableProvider.removeTable: "
+                        throw new RuntimeException("removeTable: "
                                 + "cannot delete database subdirectory", e);
                     }
                 }
@@ -124,13 +117,13 @@ public class MyTableProvider implements TableProvider {
             try {
                 Files.delete(table.toPath());
             } catch (DirectoryNotEmptyException e) {
-                throw new RuntimeException("TableProvider.tDrop: cannot remove main table directory", e);
+                throw new RuntimeException("removeTable: cannot remove main table directory", e);
             } catch (IOException e) {
-                throw new RuntimeException("TableProvider.tDrop: cannot delete main database directory", e);
+                throw new RuntimeException("removeTable: cannot delete main database directory", e);
             }
             tables.remove(name);
         } else {
-            throw new IllegalStateException("MyTableProvider.removeTable: " + name + "doesn't exist");
+            throw new IllegalStateException("removeTable: " + name + "doesn't exist");
         }
     }
 
@@ -148,8 +141,5 @@ public class MyTableProvider implements TableProvider {
     }
 
 
-    public boolean containsKey(String key) {
-        return tables.containsKey(key);
-    }
 
 }

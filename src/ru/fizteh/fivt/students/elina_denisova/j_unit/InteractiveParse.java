@@ -33,7 +33,7 @@ public class InteractiveParse {
             System.err.println(e.getMessage());
         } catch (Exception e) {
             in.close();
-            HandlerException.handler("InteractiveParse: ", e);
+            HandlerException.handler(e);
         }
         in.close();
     }

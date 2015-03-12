@@ -6,7 +6,7 @@ public class Runner {
         try {
             String path = System.getProperty("fizteh.db.dir");
             if (path == null) {
-                throw new NullPointerException("Runner: Directory doesn't exist");
+                throw new IllegalArgumentException("Directory doesn't exist");
             }
             MyTableProviderFactory factory = new MyTableProviderFactory();
             MyTableProvider base = factory.create(path);
@@ -19,10 +19,6 @@ public class Runner {
             }
         } catch (IllegalArgumentException e) {
             HandlerException.handler(e);
-        } catch (NullPointerException e) {
-            HandlerException.handler(e);
-        } catch (Exception e) {
-            HandlerException.handler("Runner: ", e);
         }
     }
 

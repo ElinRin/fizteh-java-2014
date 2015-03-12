@@ -34,14 +34,14 @@ public class MyTable implements Table {
                 for (int j = 0; j < COUNT_OBJECT; j++) {
                     File dbFile = new File(subDir, j + SUF_FILE);
                     if (dbFile.exists()) {
-                        String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
+                        String adds = index(i, j);
                         databases.put(adds, new HashMap<String, String>());
                         readFromFile(dbFile, databases.get(adds));
                     }
                 }
             }
-        } catch (Exception e) {
-            HandlerException.handler("TableProvider: ", e);
+        } catch (IllegalArgumentException e) {
+            HandlerException.handler(e);
         }
     }
 
@@ -58,7 +58,11 @@ public class MyTable implements Table {
         int hashCode = Math.abs(key.hashCode());
         int dir = hashCode % COUNT_OBJECT;
         int file = hashCode / COUNT_OBJECT % COUNT_OBJECT;
-        return Integer.toString(dir * COMMON_CONSTANT_INDEX + file);
+        return index(dir, file);
+    }
+
+    private String index(int i, int j) {
+        return  Integer.toString(i * COMMON_CONSTANT_INDEX + j);
     }
 
     @Override
@@ -67,7 +71,7 @@ public class MyTable implements Table {
             String adds = pathname(key);
             return databases.get(adds).get(key);
         } else {
-            throw new IllegalArgumentException("Table.get: Haven't key. ");
+            throw new IllegalArgumentException("get: Haven't key. ");
         }
     }
 
@@ -93,7 +97,7 @@ public class MyTable implements Table {
             }
             return oldValue;
         } else {
-            throw new IllegalArgumentException("MyTable.put: Haven't key or value. ");
+            throw new IllegalArgumentException("put: Haven't key or value. ");
         }
     }
 
@@ -114,7 +118,7 @@ public class MyTable implements Table {
                 return oldValue;
             }
         } else {
-            throw new IllegalArgumentException("Table.get: Haven't key. ");
+            throw new IllegalArgumentException("get: Haven't key. ");
         }
     }
 
@@ -123,7 +127,7 @@ public class MyTable implements Table {
         int answer = 0;
         for (int i = 0; i < COUNT_OBJECT; i++) {
             for (int j = 0; j < COUNT_OBJECT; j++) {
-                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
+                String adds = index(i, j);
                 if (databases.containsKey(adds)) {
                     answer += databases.get(adds).size();
                 }
@@ -140,7 +144,7 @@ public class MyTable implements Table {
         int count = 0;
         for (int i = 0; i < COUNT_OBJECT; i++) {
             for (int j = 0; j < COUNT_OBJECT; j++) {
-                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
+                String adds = index(i, j);
                 if (databases.containsKey(adds)) {
                     File directory = new File(mainDir.toString(), i + SUF_DIR);
                     if (!directory.exists()) {
@@ -154,7 +158,7 @@ public class MyTable implements Table {
                         try {
                             Files.delete(dataBaseOld.toPath());
                         } catch (IOException e) {
-                            throw new RuntimeException("MyTable.writeInFile: Can't overwrite file");
+                            throw new RuntimeException("writeInFile: Can't overwrite file");
                         }
                     }
 
@@ -175,9 +179,9 @@ public class MyTable implements Table {
                             writeNext(dbFile, current.getValue());
                         }
                     } catch (FileNotFoundException e) {
-                        throw new RuntimeException("MyTable.writeInFile: File not found");
+                        throw new RuntimeException("writeInFile: File not found");
                     } catch (IOException e) {
-                        throw new RuntimeException("MyTable.writeInFile: Can't write to file.", e);
+                        throw new RuntimeException("writeInFile: Can't write to file.", e);
                     }
 
                     if (databases.get(adds).size() == 0) {
@@ -188,14 +192,14 @@ public class MyTable implements Table {
                                 Files.delete(dbFile.toPath());
                             }
                         } catch (IOException e) {
-                            throw new IllegalStateException("MyTable.remove: "
+                            throw new IllegalStateException("remove: "
                                     + "Cannot delete database file. ", e);
                         }
                         databases.remove(adds);
 
                         int k = 0;
                         for (int file = 0; file < COUNT_OBJECT; file++) {
-                            String variableAdds = Integer.toString(i * COMMON_CONSTANT_INDEX + file);
+                            String variableAdds = index(i, file);
                             if (databases.containsKey(variableAdds)) {
                                 k++;
                             }
@@ -204,10 +208,10 @@ public class MyTable implements Table {
                             try {
                                 Files.delete(subDir.toPath());
                             } catch (DirectoryNotEmptyException e) {
-                                throw new IllegalStateException("MyTable.remove: Cannot remove table subdirectory. "
+                                throw new IllegalStateException("remove: Cannot remove table subdirectory. "
                                         + "Redundant files", e);
                             } catch (IOException e) {
-                                throw new IllegalStateException("MyTable.remove: "
+                                throw new IllegalStateException("remove: "
                                         + "Cannot delete database subdirectory", e);
                             }
                         }
@@ -224,9 +228,9 @@ public class MyTable implements Table {
             dbFile.writeInt(word.getBytes(ENCODING).length);
             dbFile.write(word.getBytes(ENCODING));
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Table.writeNext: Don't supported encoding " + ENCODING + ". ");
+            throw new RuntimeException("writeNext: Don't supported encoding " + ENCODING + ". ");
         } catch (IOException e) {
-            throw new RuntimeException("Table.writeNext: Can't write to database. ", e);
+            throw new RuntimeException("writeNext: Can't write to database. ", e);
         }
     }
     public void readFromFile(File dbFileName,  Map<String, String> data) throws IllegalArgumentException {
@@ -237,21 +241,17 @@ public class MyTable implements Table {
                     String key = readNext(file);
                     String value = readNext(file);
                     if (data.containsKey(key)) {
-                        throw new IllegalArgumentException("Table.readFromFile: Two same keys in database file");
+                        throw new IllegalArgumentException("readFromFile: Two same keys in database file");
                     }
                     data.put(key, value);
                 }
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException | IllegalArgumentException | FileNotFoundException e) {
             throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Table.readFromFile: File not found", e);
         } catch (IOException e) {
-            throw new RuntimeException(" Table.readFromFile: Problems with reading from database file " + e.toString());
+            throw new RuntimeException(" readFromFile: Problems with reading from database file " + e.toString());
         } catch (Exception e) {
-            throw new RuntimeException("Table.readFromFile: ", e);
+            throw new RuntimeException("readFromFile: ", e);
         }
     }
 
@@ -263,9 +263,9 @@ public class MyTable implements Table {
             dbFile.read(word, 0, wordLength);
             return new String(word, ENCODING);
         } catch (UnsupportedEncodingException e) {
-            throw new UnsupportedEncodingException("Table.readNext: UTF-8 encoding is not supported");
+            throw new UnsupportedEncodingException("readNext: UTF-8 encoding is not supported");
         } catch (IOException e) {
-            throw new IOException(" Table.readNext: Can't read from database " + e.toString());
+            throw new IOException(" readNext: Can't read from database " + e.toString());
         }
     }
 
@@ -300,7 +300,7 @@ public class MyTable implements Table {
         List<String> listKey = new ArrayList<>();
         for (int i = 0; i < COUNT_OBJECT; i++) {
             for (int j = 0; j < COUNT_OBJECT; j++) {
-                String adds = Integer.toString(i * COMMON_CONSTANT_INDEX + j);
+                String adds = index(i, j);
                 if (databases.containsKey(adds)) {
                     for (String key : databases.get(adds).keySet()) {
                         listKey.add(key);

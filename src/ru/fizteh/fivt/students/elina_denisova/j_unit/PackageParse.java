@@ -37,9 +37,9 @@ public class PackageParse {
             System.out.println("Goodbye");
             System.exit(0);
         } catch (IllegalArgumentException e) {
-            HandlerException.handler("PackageParse: Wrong arguments", e);
+            HandlerException.handler("Wrong arguments", e);
         } catch (Exception e) {
-            HandlerException.handler("PackageParse: ", e);
+            HandlerException.handler( e);
         }
     }
 }
